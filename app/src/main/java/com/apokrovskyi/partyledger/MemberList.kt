@@ -6,19 +6,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import androidx.fragment.app.Fragment
+import android.widget.Toast
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.apokrovskyi.partyledger.adapters.MutableListAdapter
 import com.apokrovskyi.partyledger.adapters.SwipeDeleteCallback
-import com.apokrovskyi.partyledger.models.Member
 import com.apokrovskyi.partyledger.models.Ledger
+import com.apokrovskyi.partyledger.models.Member
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-class MemberList : Fragment() {
+class MemberList : TitledFragment("Party members") {
     private lateinit var addButton: FloatingActionButton
     private lateinit var memberList: RecyclerView
-    private lateinit var dialog: AlertDialog
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,17 +35,23 @@ class MemberList : Fragment() {
         memberList.adapter = adapter
         ItemTouchHelper(SwipeDeleteCallback(adapter)).attachToRecyclerView(memberList)
 
-        dialog = AlertDialog.Builder(this.context)
+        val dialogView = Util.inflateDialog(layoutInflater, R.layout.textbox_dialog)
+
+        val alertDialog = AlertDialog.Builder(this.context)
             .setTitle("New member")
-            .setView(layoutInflater.inflate(R.layout.textbox_dialog, null))
+            .setView(dialogView)
             .setPositiveButton("Add")
-            { _, _ -> adapter.addItem(Member(dialog.findViewById<EditText>(R.id.textEdit).text.toString())) }
-            .setNegativeButton("Cancel") { _, _ -> dialog.cancel() }
+            { _, _ ->
+                val name = dialogView.findViewById<EditText>(R.id.textEdit).text.toString();
+                if (name.isBlank()) {
+                    Toast.makeText(this.context, "No member name specified", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+                adapter.addItem(Member())
+            }
+            .setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
             .create()
 
-        addButton.setOnClickListener {
-            dialog.show()
-            dialog.findViewById<EditText>(R.id.textEdit).text.clear();
-        }
+        addButton.setOnClickListener { alertDialog.show() }
     }
 }

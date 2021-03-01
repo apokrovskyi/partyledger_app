@@ -8,18 +8,18 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Spinner
-import androidx.fragment.app.Fragment
+import android.widget.Toast
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.apokrovskyi.partyledger.adapters.MutableListAdapter
 import com.apokrovskyi.partyledger.adapters.SwipeDeleteCallback
 import com.apokrovskyi.partyledger.models.Group
+import com.apokrovskyi.partyledger.models.Ledger
 import com.apokrovskyi.partyledger.models.Member
 import com.apokrovskyi.partyledger.models.Purchase
-import com.apokrovskyi.partyledger.models.Ledger
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-class PurchaseList : Fragment() {
+class PurchaseList : TitledFragment("Payments from member to group") {
     private lateinit var addButton: FloatingActionButton
     private lateinit var purchaseList: RecyclerView
     private lateinit var dialog: AlertDialog
@@ -41,7 +41,7 @@ class PurchaseList : Fragment() {
         purchaseList.adapter = purchaseAdapter
         ItemTouchHelper(SwipeDeleteCallback(purchaseAdapter)).attachToRecyclerView(purchaseList)
 
-        val dialogView = layoutInflater.inflate(R.layout.purchase_dialog, null)
+        val dialogView = Util.inflateDialog(layoutInflater, R.layout.purchase_dialog)
         val fromS = dialogView.findViewById<Spinner>(R.id.from_spinner)
         val toS = dialogView.findViewById<Spinner>(R.id.to_spinner)
         val amountView = dialogView.findViewById<EditText>(R.id.amountEdit)
@@ -70,7 +70,10 @@ class PurchaseList : Fragment() {
             .setView(dialogView)
             .setPositiveButton("Add")
             { _, _ ->
-                if (fromS.selectedItemPosition < 0 || toS.selectedItemPosition < 0) return@setPositiveButton
+                if (fromS.selectedItemPosition < 0 || toS.selectedItemPosition < 0) {
+                    Toast.makeText(this.context, "Purchase source-target pair not selected", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
                 val amount = amountView.text.toString().toIntOrNull() ?: 0
                 val description = descriptionView.text.toString()
 
