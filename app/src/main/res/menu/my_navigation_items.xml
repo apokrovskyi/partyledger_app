@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/total"
+            android:title="Total" />
+        <item
+            android:id="@+id/members"
+            android:title="Members" />
+        <item
+            android:id="@+id/groups"
+            android:title="Groups" />
+        <item
+            android:id="@+id/purchases"
+            android:title="Purchases" />
+        <item
+            android:id="@+id/payments"
+            android:title="Payments" />
+    </group>
+
+</menu>
