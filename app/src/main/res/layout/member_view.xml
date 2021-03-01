@@ -9,8 +9,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
-        android:layout_marginVertical="10dp"
+        android:layout_marginVertical="@dimen/margin_small"
         android:text=""
-        android:textColor="@color/textColor"
-        android:textSize="16sp" />
+        android:textColor="@color/textColor" />
 </RelativeLayout>

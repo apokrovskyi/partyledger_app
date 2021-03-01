@@ -4,13 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.apokrovskyi.partyledger.adapters.MoveItemAdapter
-import com.apokrovskyi.partyledger.models.*
+import com.apokrovskyi.partyledger.models.Ledger
+import com.apokrovskyi.partyledger.models.Member
+import com.apokrovskyi.partyledger.models.Payment
+import com.apokrovskyi.partyledger.models.Purchase
 import kotlin.math.min
 
-class Total : Fragment() {
+class Total : TitledFragment("Total debt") {
     private lateinit var debtList: MutableList<Payment>
 
     override fun onCreateView(
@@ -32,8 +34,7 @@ class Total : Fragment() {
         // transform back into map and shift debt
 
         debtMap = mapPurchases(debtList, false)
-        while (tryShiftDebt(debtMap)) {
-        }
+        while (true) if (!tryShiftDebt(debtMap)) break
         debtList = collectPayments(debtMap)
 
         val paymentList = view.findViewById<RecyclerView>(R.id.debtPayments)
@@ -100,7 +101,7 @@ class Total : Fragment() {
     ): MutableMap<Member, MutableMap<Member, Int>> {
         val result = HashMap<Member, MutableMap<Member, Int>>()
         for (payment in purchases) {
-            val amount = (payment.amount / payment.to.memberList.size).toInt()
+            val amount = (payment.amount / payment.to.memberList.size)
             for (memberTo in payment.to.memberList) {
                 if (memberTo == payment.from)
                     continue

@@ -27,13 +27,6 @@ class MainActivity : AppCompatActivity(),
     private lateinit var mNavigationView: NavigationView
     private lateinit var mSpinner: Spinner
     private lateinit var mHeader: TextView
-    private val headers = mapOf(
-        R.id.total to "Total debt",
-        R.id.members to "Party members",
-        R.id.groups to "Party member groups",
-        R.id.purchases to "Payments from member to group",
-        R.id.payments to "Payments from member to member"
-    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,7 +37,7 @@ class MainActivity : AppCompatActivity(),
         mToggle = ActionBarDrawerToggle(this, mDrawerLayout, R.string.open, R.string.close)
         mNavigationView = findViewById(R.id.navigation_view)
 
-        mDrawerLayout.addDrawerListener(mToggle);
+        mDrawerLayout.addDrawerListener(mToggle)
         mToggle.syncState()
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -53,14 +46,14 @@ class MainActivity : AppCompatActivity(),
 
         Global.load(applicationContext)
 
-        mSpinner = findViewById<Spinner>(R.id.spinner)
+        mSpinner = findViewById(R.id.spinner)
         updateSpinner()
         mSpinner.onItemSelectedListener = this
-        val button = findViewById<Button>(R.id.delete_button)
+        val button = findViewById<ImageButton>(R.id.delete_button)
         button.setOnClickListener {
             Ledger.ledgers.removeAt(mSpinner.selectedItemPosition)
             if (Ledger.ledgers.isEmpty())
-                Ledger.ledgers.add(Ledger("trip"))
+                Ledger.ledgers.add(Ledger("Ledger"))
             Ledger.Current = Global.ledgers[0]
             updateSpinner()
         }
@@ -77,23 +70,28 @@ class MainActivity : AppCompatActivity(),
             return
         }
 
-        val dialogView = layoutInflater.inflate(R.layout.textbox_dialog, null)
+        mSpinner.setSelection(Ledger.ledgers.indexOf(Ledger.Current))
+
+        val dialogView = Util.inflateDialog(layoutInflater, R.layout.textbox_dialog)
 
         AlertDialog.Builder(this)
-            .setTitle("New trip")
+            .setTitle("New ledger")
             .setView(dialogView)
-            .setPositiveButton("Add") { dialog, _ ->
+            .setPositiveButton("Add")
+            { dialog, _ ->
                 dialog.dismiss()
-                val newTrip = Ledger(
-                    dialogView.findViewById<EditText>(R.id.textEdit).text.toString()
-                )
-                Ledger.ledgers.add(newTrip)
-                Ledger.Current = newTrip
+                val name = dialogView.findViewById<EditText>(R.id.textEdit).text.toString()
+                if (name.isBlank()) {
+                    Toast.makeText(this, "No ledger name specified", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                val newLedger = Ledger(name)
+                Ledger.ledgers.add(newLedger)
+                Ledger.Current = newLedger
                 updateSpinner()
             }
-            .setNegativeButton("Cancel") { dialog, _ ->
-                dialog.cancel()
-            }
+            .setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
             .create()
             .show()
     }
@@ -104,7 +102,7 @@ class MainActivity : AppCompatActivity(),
         mSpinner.adapter = ArrayAdapter<Ledger>(
             applicationContext,
             android.R.layout.simple_spinner_dropdown_item,
-            Global.ledgers.plus(Ledger("[new trip]")).toTypedArray()
+            Global.ledgers.plus(Ledger("[new ledger]")).toTypedArray()
         )
         mSpinner.setSelection(Ledger.ledgers.indexOf(Ledger.Current))
         selectFragment(R.id.total)
@@ -112,7 +110,7 @@ class MainActivity : AppCompatActivity(),
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (mToggle.onOptionsItemSelected(item))
-            return true;
+            return true
 
         return super.onOptionsItemSelected(item)
     }
@@ -123,7 +121,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     private fun selectFragment(id: Int) {
-        val fragment: Fragment = when (id) {
+        val fragment: TitledFragment = when (id) {
             R.id.total -> Total()
             R.id.members -> MemberList()
             R.id.groups -> GroupList()
@@ -132,18 +130,10 @@ class MainActivity : AppCompatActivity(),
             else -> throw IllegalArgumentException("Wrong item id")
         }
 
-        mNavigationView.menu.findItem(id).isChecked = true;
+        mNavigationView.menu.findItem(id).isChecked = true
         supportFragmentManager.beginTransaction().replace(R.id.flContent, fragment).commit()
-        mHeader.text = headers[id]
+        mHeader.text = fragment.title
         mDrawerLayout.closeDrawers()
-    }
-
-    override fun onBackPressed() {
-        if (mDrawerLayout.isDrawerOpen(GravityCompat.START))
-            mDrawerLayout.closeDrawer(GravityCompat.START)
-        else
-            super.onBackPressed()
-
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
@@ -163,6 +153,11 @@ class MainActivity : AppCompatActivity(),
                         Global.save(applicationContext)
                     )
                 )
+            else if (keyCode == KeyEvent.KEYCODE_BACK) {
+                if (mDrawerLayout.isDrawerOpen(GravityCompat.START))
+                    mDrawerLayout.closeDrawer(GravityCompat.START)
+                else return false
+            }
             return true
         }
         return false
