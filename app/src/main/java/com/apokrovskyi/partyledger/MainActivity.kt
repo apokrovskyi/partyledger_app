@@ -56,11 +56,11 @@ class MainActivity : AppCompatActivity(),
         mSpinner = findViewById<Spinner>(R.id.spinner)
         updateSpinner()
         mSpinner.onItemSelectedListener = this
-        val button = findViewById<Button>(R.id.delete_button)
+        val button = findViewById<ImageButton>(R.id.delete_button)
         button.setOnClickListener {
             Ledger.ledgers.removeAt(mSpinner.selectedItemPosition)
             if (Ledger.ledgers.isEmpty())
-                Ledger.ledgers.add(Ledger("trip"))
+                Ledger.ledgers.add(Ledger("Ledger"))
             Ledger.Current = Global.ledgers[0]
             updateSpinner()
         }
@@ -80,15 +80,15 @@ class MainActivity : AppCompatActivity(),
         val dialogView = layoutInflater.inflate(R.layout.textbox_dialog, null)
 
         AlertDialog.Builder(this)
-            .setTitle("New trip")
+            .setTitle("New ledger")
             .setView(dialogView)
             .setPositiveButton("Add") { dialog, _ ->
                 dialog.dismiss()
-                val newTrip = Ledger(
+                val newLedger = Ledger(
                     dialogView.findViewById<EditText>(R.id.textEdit).text.toString()
                 )
-                Ledger.ledgers.add(newTrip)
-                Ledger.Current = newTrip
+                Ledger.ledgers.add(newLedger)
+                Ledger.Current = newLedger
                 updateSpinner()
             }
             .setNegativeButton("Cancel") { dialog, _ ->
@@ -104,7 +104,7 @@ class MainActivity : AppCompatActivity(),
         mSpinner.adapter = ArrayAdapter<Ledger>(
             applicationContext,
             android.R.layout.simple_spinner_dropdown_item,
-            Global.ledgers.plus(Ledger("[new trip]")).toTypedArray()
+            Global.ledgers.plus(Ledger("[new ledger]")).toTypedArray()
         )
         mSpinner.setSelection(Ledger.ledgers.indexOf(Ledger.Current))
         selectFragment(R.id.total)
